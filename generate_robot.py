@@ -23,8 +23,12 @@ ACCENT_DARK = (38, 152, 180, 255)
 VISOR = (42, 56, 78, 255)
 VISOR_FRAME = (22, 30, 46, 255)
 EYE = (255, 220, 90, 255)
+EYE_HL = (255, 252, 220, 255)
+BLUSH = (255, 168, 188, 255)
+MOUTH = (220, 96, 142, 255)
 ANTENNA = (148, 160, 178, 255)
 ANTENNA_TIP = (255, 110, 162, 255)
+ANTENNA_TIP_HL = (255, 200, 220, 255)
 SHADOW_A = (0, 0, 0, 95)
 SHADOW_B = (0, 0, 0, 55)
 
@@ -66,19 +70,20 @@ def body_color_at(x, y, is_back):
 
 # Per-direction face/arm config.
 # eyes: list of (x, y) — 2x2 round eye anchors (top-left pixel).
-# mouth: (x, y) — small cyan friendly mouth dot, or None.
+# mouth: (x, y) — single-pixel cute mouth, or None.
+# blush: list of (x, y) — pink cheek dots, or None.
 # lean: antenna lean -1, 0, +1.
 # arms_L / arms_R: cyan arm stub on that side.
 # back: True = camera sees back of head (darker shading, no face).
 DIR_CONFIG = {
-    0: {'eyes': [(11, 11), (18, 11)], 'mouth': (15, 15), 'lean': 0, 'arms_L': True, 'arms_R': True, 'back': False, 'chest': 'center'},
-    1: {'eyes': [(13, 11), (18, 11)], 'mouth': (16, 15), 'lean': 1, 'arms_L': False, 'arms_R': True, 'back': False, 'chest': 'right'},
-    2: {'eyes': [(18, 11)],            'mouth': None,     'lean': 1, 'arms_L': False, 'arms_R': True, 'back': False, 'chest': None},
-    3: {'eyes': [],                    'mouth': None,     'lean': 1, 'arms_L': False, 'arms_R': True, 'back': True,  'chest': None},
-    4: {'eyes': [],                    'mouth': None,     'lean': 0, 'arms_L': True,  'arms_R': True, 'back': True,  'chest': None},
-    5: {'eyes': [],                    'mouth': None,     'lean': -1,'arms_L': True,  'arms_R': False,'back': True,  'chest': None},
-    6: {'eyes': [(11, 11)],            'mouth': None,     'lean': -1,'arms_L': True,  'arms_R': False,'back': False, 'chest': None},
-    7: {'eyes': [(11, 11), (16, 11)], 'mouth': (14, 15), 'lean': -1,'arms_L': True,  'arms_R': False,'back': False, 'chest': 'left'},
+    0: {'eyes': [(11, 11), (18, 11)], 'mouth': (15, 15), 'blush': [(10, 14), (21, 14)], 'lean': 0, 'arms_L': True, 'arms_R': True, 'back': False},
+    1: {'eyes': [(13, 11), (18, 11)], 'mouth': (16, 15), 'blush': [(21, 14)],             'lean': 1, 'arms_L': False, 'arms_R': True, 'back': False},
+    2: {'eyes': [(18, 11)],            'mouth': None,     'blush': [(21, 14)],             'lean': 1, 'arms_L': False, 'arms_R': True, 'back': False},
+    3: {'eyes': [],                    'mouth': None,     'blush': [],                     'lean': 1, 'arms_L': False, 'arms_R': True, 'back': True },
+    4: {'eyes': [],                    'mouth': None,     'blush': [],                     'lean': 0, 'arms_L': True,  'arms_R': True, 'back': True },
+    5: {'eyes': [],                    'mouth': None,     'blush': [],                     'lean': -1,'arms_L': True,  'arms_R': False,'back': True },
+    6: {'eyes': [(11, 11)],            'mouth': None,     'blush': [(10, 14)],             'lean': -1,'arms_L': True,  'arms_R': False,'back': False},
+    7: {'eyes': [(11, 11), (16, 11)], 'mouth': (14, 15), 'blush': [(10, 14)],             'lean': -1,'arms_L': True,  'arms_R': False,'back': False},
 }
 
 BOB = [0, -1, -2, -2, -1, 0]
@@ -118,7 +123,7 @@ def render_cell(direction, frame):
             if is_rim(x, y):
                 set_px(cell, x, y + by, RIM)
 
-    # Antenna pole + tip
+    # Antenna pole + chunky tip with sparkle
     lean = cfg['lean']
     pole_ys = [5, 6, 7]
     for i, y in enumerate(pole_ys):
@@ -126,30 +131,34 @@ def render_cell(direction, frame):
         ax = round(15.5 + lean * (1 - t))
         set_px(cell, ax, y + by, ANTENNA)
     tip_x = round(15.5 + lean * 1)
+    # 2x2 pink bulb
     set_px(cell, tip_x, 4 + by, ANTENNA_TIP)
+    set_px(cell, tip_x - 1, 4 + by, ANTENNA_TIP)
+    set_px(cell, tip_x, 3 + by, ANTENNA_TIP)
+    set_px(cell, tip_x - 1, 3 + by, ANTENNA_TIP_HL)  # sparkle
 
-    # Eyes — 2x2 friendly round eye blocks with dark frame
+    # Blush — soft pink cheek dots (drawn under eyes, behind/below)
+    for (bx, byx) in cfg.get('blush') or []:
+        if in_body(bx, byx):
+            set_px(cell, bx, byx + by, BLUSH)
+
+    # Eyes — 2x2 round eye blocks, minimal under-shadow + sparkle highlight
     for (ex, ey) in cfg['eyes']:
-        # frame ring (top/bottom/sides) for definition
-        set_px(cell, ex, ey - 1 + by, VISOR_FRAME)
-        set_px(cell, ex + 1, ey - 1 + by, VISOR_FRAME)
-        set_px(cell, ex - 1, ey + by, VISOR_FRAME)
-        set_px(cell, ex - 1, ey + 1 + by, VISOR_FRAME)
-        set_px(cell, ex + 2, ey + by, VISOR_FRAME)
-        set_px(cell, ex + 2, ey + 1 + by, VISOR_FRAME)
+        # gentle "eye socket" shadow underneath only (no heavy frame)
         set_px(cell, ex, ey + 2 + by, VISOR_FRAME)
         set_px(cell, ex + 1, ey + 2 + by, VISOR_FRAME)
-        # eye glow fill
+        # eye fill
         set_px(cell, ex, ey + by, EYE)
         set_px(cell, ex + 1, ey + by, EYE)
         set_px(cell, ex, ey + 1 + by, EYE)
         set_px(cell, ex + 1, ey + 1 + by, EYE)
+        # sparkle highlight (upper-left pixel)
+        set_px(cell, ex, ey + by, EYE_HL)
 
-    # Friendly mouth — 2px cyan smile dot
+    # Tiny "o" mouth (single pink pixel) — cute helper expression
     if cfg.get('mouth'):
         mx, my = cfg['mouth']
-        set_px(cell, mx, my + by, ACCENT_DARK)
-        set_px(cell, mx + 1, my + by, ACCENT_DARK)
+        set_px(cell, mx, my + by, MOUTH)
 
     # Arms: cyan stub just outside body at widest row (2px wide for legibility)
     arm_y = 15
