@@ -1,0 +1,74 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging / build
+build/
+dist/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+.eggs/
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+
+# ---- Phaser / Node / web ----
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+.yarn-integrity
+package-lock.json.bak
+
+# Build output
+dist/
+build/
+out/
+.cache/
+.parcel-cache/
+.vite/
+.next/
+.nuxt/
+.turbo/
+
+# Bundler artifacts
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# ---- Editors / OS ----
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
