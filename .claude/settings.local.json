@@ -6,7 +6,8 @@
       "Bash(python3 generate_robot.py)",
       "Bash(git config *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }

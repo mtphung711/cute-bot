@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Robot — Angled Top-Down Demo</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #14171f; color: #c8d0dc; font-family: system-ui, sans-serif; }
+    body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+    #game { image-rendering: pixelated; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+    p { margin: 0; font-size: 13px; opacity: 0.7; }
+  </style>
+</head>
+<body>
+  <div id="game"></div>
+  <p>WASD or arrow keys to move</p>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
