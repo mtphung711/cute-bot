@@ -16,6 +16,8 @@ function dirFromVelocity(vx: number, vy: number): Direction {
 
 class RobotScene extends Phaser.Scene {
   private robot!: Phaser.Physics.Arcade.Sprite;
+  private egg!: Phaser.Physics.Arcade.Sprite;
+  private eggArmed = true;
   private facing: Direction = 'S';
   private keys!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -54,11 +56,13 @@ class RobotScene extends Phaser.Scene {
       key: 'egg-wiggle',
       frames: this.anims.generateFrameNumbers('egg', { start: 0, end: 7 }),
       frameRate: 8,
-      repeat: -1,
     });
-    const egg = this.add.sprite(W / 2 - 56, H / 2 + 24, 'egg', 0);
-    egg.setDepth(0);
-    egg.play('egg-wiggle');
+    this.egg = this.physics.add.sprite(W / 2 - 56, H / 2 + 24, 'egg', 0);
+    this.egg.setDepth(0);
+    const eggBody = this.egg.body as Phaser.Physics.Arcade.Body;
+    eggBody.setImmovable(true);
+    eggBody.setSize(16, 20).setOffset(8, 6);
+    this.egg.on('animationcomplete', () => this.egg.setFrame(0));
 
     this.robot = this.physics.add.sprite(W / 2, H / 2, 'robot', 0);
     this.robot.setCollideWorldBounds(true);
@@ -66,6 +70,12 @@ class RobotScene extends Phaser.Scene {
     this.robot.play('robot-walk-S');
     this.robot.anims.pause();
     this.facing = 'S';
+
+    this.physics.add.overlap(this.robot, this.egg, () => {
+      if (!this.eggArmed) return;
+      this.eggArmed = false;
+      this.egg.play({ key: 'egg-wiggle', repeat: 4 });
+    });
 
     this.keys = this.input.keyboard!.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.W,
@@ -77,6 +87,11 @@ class RobotScene extends Phaser.Scene {
   }
 
   update() {
+    if (!this.eggArmed && !this.egg.anims.isPlaying) {
+      const overlapping = this.physics.world.overlap(this.robot, this.egg);
+      if (!overlapping) this.eggArmed = true;
+    }
+
     const k = this.keys, c = this.cursors;
     let vx = 0, vy = 0;
     if (k.left.isDown || c.left.isDown) vx -= 1;
