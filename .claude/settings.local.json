@@ -10,7 +10,18 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(git mv *)",
       "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(curl -sI http://localhost:5173/robot.png)",
+      "Bash(curl -s http://localhost:5173/robot.png)",
+      "Bash(md5 public/robot.png)",
+      "Bash(md5)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null && git push -u origin main)",
+      "Bash(chmod 700 ~/.ssh)",
+      "Bash(ssh-keyscan -t rsa,ecdsa,ed25519 github.com)",
+      "Bash(gh auth *)",
+      "Bash(python3 generate_egg.py)"
     ]
   }
 }

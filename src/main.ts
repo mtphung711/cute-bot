@@ -22,17 +22,18 @@ class RobotScene extends Phaser.Scene {
 
   preload() {
     this.load.spritesheet('robot', 'robot.png', { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('egg', 'egg.png', { frameWidth: 32, frameHeight: 32 });
   }
 
   create() {
     const TILE = 32;
     const g = this.add.graphics();
-    g.fillStyle(0x2a3344, 1).fillRect(0, 0, TILE, TILE);
-    g.fillStyle(0x313b50, 1);
+    g.fillStyle(0x6b5d8f, 1).fillRect(0, 0, TILE, TILE);
+    g.fillStyle(0x7a6ca0, 1);
     for (let i = -TILE; i < TILE * 2; i += 8) {
       g.fillRect(i, 0, 4, TILE);
     }
-    g.lineStyle(1, 0x1c2230, 1).strokeRect(0, 0, TILE, TILE);
+    g.lineStyle(1, 0x4a3f6a, 1).strokeRect(0, 0, TILE, TILE);
     g.generateTexture('ground', TILE, TILE);
     g.destroy();
     this.add.tileSprite(0, 0, W, H, 'ground').setOrigin(0, 0);
@@ -49,8 +50,19 @@ class RobotScene extends Phaser.Scene {
       });
     });
 
+    this.anims.create({
+      key: 'egg-wiggle',
+      frames: this.anims.generateFrameNumbers('egg', { start: 0, end: 7 }),
+      frameRate: 8,
+      repeat: -1,
+    });
+    const egg = this.add.sprite(W / 2 - 56, H / 2 + 24, 'egg', 0);
+    egg.setDepth(0);
+    egg.play('egg-wiggle');
+
     this.robot = this.physics.add.sprite(W / 2, H / 2, 'robot', 0);
     this.robot.setCollideWorldBounds(true);
+    this.robot.setDepth(1);
     this.robot.play('robot-walk-S');
     this.robot.anims.pause();
     this.facing = 'S';
