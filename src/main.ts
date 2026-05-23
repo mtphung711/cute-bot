@@ -37,14 +37,6 @@ class RobotScene extends Phaser.Scene {
     g.destroy();
     this.add.tileSprite(0, 0, W, H, 'ground').setOrigin(0, 0);
 
-    const pads: Array<[number, number]> = [
-      [80, 70], [380, 90], [120, 240], [340, 230], [240, 160],
-    ];
-    pads.forEach(([x, y]) => {
-      this.add.ellipse(x, y + 6, 28, 10, 0x000000, 0.35);
-      this.add.circle(x, y, 10, 0x5ad7e8).setStrokeStyle(1, 0x2698b4);
-    });
-
     DIRS.forEach((dir, row) => {
       this.anims.create({
         key: `robot-walk-${dir}`,
