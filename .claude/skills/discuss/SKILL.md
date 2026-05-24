@@ -60,6 +60,8 @@ Formatting requirements:
 
 # Output Structure
 
+Keep the full response at most 300 words.
+
 Use this fixed structure and keep it concise:
 
 1. Atomic Breakdown
@@ -67,8 +69,6 @@ Use this fixed structure and keep it concise:
 3. Options and Tradeoffs
 4. Recommendation
 5. Clarifying Questions or Permission to Proceed
-
-Keep the full response at most 200 words.
 
 # Style Rules
 
