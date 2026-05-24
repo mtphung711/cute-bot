@@ -21,10 +21,19 @@ class RobotScene extends Phaser.Scene {
   private facing: Direction = 'S';
   private keys!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+  private confirmKeys!: Phaser.Input.Keyboard.Key[];
+  private popup!: Phaser.GameObjects.Image;
+  private popupBulb!: Phaser.GameObjects.Sprite;
+  private hoverBulb!: Phaser.GameObjects.Sprite;
+  private popupOpen = false;
+  private bulbOn = false;
+  private popupArmed = true;
 
   preload() {
     this.load.spritesheet('robot', 'robot.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('egg', 'egg.png', { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('bulb', 'bulb.png', { frameWidth: 24, frameHeight: 24 });
+    this.load.image('popup', 'popup.png');
   }
 
   create() {
@@ -72,9 +81,13 @@ class RobotScene extends Phaser.Scene {
     this.facing = 'S';
 
     this.physics.add.overlap(this.robot, this.egg, () => {
-      if (!this.eggArmed) return;
-      this.eggArmed = false;
-      this.egg.play({ key: 'egg-wiggle', repeat: 4 });
+      if (this.eggArmed) {
+        this.eggArmed = false;
+        this.egg.play({ key: 'egg-wiggle', repeat: 4 });
+      }
+      if (this.popupArmed && !this.popupOpen) {
+        this.openPopup();
+      }
     });
 
     this.keys = this.input.keyboard!.addKeys({
@@ -84,12 +97,69 @@ class RobotScene extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     }) as Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
     this.cursors = this.input.keyboard!.createCursorKeys();
+    this.confirmKeys = [
+      this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
+      this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER),
+    ];
+
+    // Hover bulb: floats above the egg when bulbOn, glass facing down (flipped).
+    this.hoverBulb = this.add.sprite(this.egg.x, this.egg.y - 22, 'bulb', 1);
+    this.hoverBulb.setFlipY(true);
+    this.hoverBulb.setDepth(2);
+    this.hoverBulb.setVisible(false);
+
+    // Popup panel: anchored so notch tip (sprite-local 23,36) sits just above egg.
+    this.popup = this.add.image(this.egg.x, this.egg.y - 18, 'popup');
+    this.popup.setOrigin(23 / 48, 36 / 40);
+    this.popup.setDepth(10);
+    this.popup.setVisible(false);
+
+    // Bulb inside popup: focused but unlit (frame 2). Centered on panel body.
+    const panelCx = this.popup.x + (24 - 23) * 1; // panel center is 24, notch at 23 → +1
+    const panelCy = this.popup.y - 36 + 17;       // panel midpoint vertically (~row 17)
+    this.popupBulb = this.add.sprite(panelCx, panelCy, 'bulb', 2);
+    this.popupBulb.setDepth(11);
+    this.popupBulb.setVisible(false);
+  }
+
+  private openPopup() {
+    this.popupOpen = true;
+    this.popupArmed = false;
+    this.popup.setVisible(true);
+    this.popupBulb.setVisible(true);
+    this.robot.setVelocity(0, 0);
+    if (this.robot.anims.isPlaying) {
+      this.robot.anims.pause();
+      const row = DIRS.indexOf(this.facing);
+      this.robot.setFrame(row * 6);
+    }
+  }
+
+  private closePopup() {
+    this.popupOpen = false;
+    this.popup.setVisible(false);
+    this.popupBulb.setVisible(false);
+    this.bulbOn = !this.bulbOn;
+    this.hoverBulb.setVisible(this.bulbOn);
   }
 
   update() {
     if (!this.eggArmed && !this.egg.anims.isPlaying) {
       const overlapping = this.physics.world.overlap(this.robot, this.egg);
       if (!overlapping) this.eggArmed = true;
+    }
+
+    if (!this.popupOpen && !this.popupArmed) {
+      const overlapping = this.physics.world.overlap(this.robot, this.egg);
+      if (!overlapping) this.popupArmed = true;
+    }
+
+    if (this.popupOpen) {
+      this.robot.setVelocity(0, 0);
+      if (this.confirmKeys.some((key) => Phaser.Input.Keyboard.JustDown(key))) {
+        this.closePopup();
+      }
+      return;
     }
 
     const k = this.keys, c = this.cursors;

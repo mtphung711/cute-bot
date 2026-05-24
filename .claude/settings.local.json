@@ -21,7 +21,11 @@
       "Bash(chmod 700 ~/.ssh)",
       "Bash(ssh-keyscan -t rsa,ecdsa,ed25519 github.com)",
       "Bash(gh auth *)",
-      "Bash(python3 generate_egg.py)"
+      "Bash(python3 generate_egg.py)",
+      "Bash(python3 generate_bulb.py)",
+      "Bash(python3 generate_popup.py)",
+      "WebSearch",
+      "WebFetch(domain:en.wikipedia.org)"
     ]
   }
 }
